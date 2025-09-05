@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <stddef.h>
 
-void vga_putc(char c);
+// void vga_putc(char c);
 void vga_print(const char* str);
 
 #endif

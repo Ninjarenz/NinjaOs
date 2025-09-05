@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-void keyboard_handler(void);
 void keyboard_init(void);
+void keyboard_handler_stub(void);
 
 #endif
