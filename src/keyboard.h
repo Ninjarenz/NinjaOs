@@ -1,6 +1,9 @@
-#pragma once
-#include <stdint.h>
-#include <stddef.h>  // für size_t
+#ifndef KEYBOARD_H
+#define KEYBOARD_H
 
-// IRQ1 Handler, aufgerufen vom ASM-Stub
+#include <stdint.h>
+
 void keyboard_handler(void);
+void keyboard_init(void);
+
+#endif

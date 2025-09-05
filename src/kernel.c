@@ -1,14 +1,14 @@
+#include "vga.h"
 #include "idt.h"
 #include "keyboard.h"
-#include "vga.h"   // <- hinzufügen
-#include <stdint.h>
 
 void kmain(void) {
-    puts("NINJA_OS v0.3\n");
-    puts("Keyboard demo: Type something!\n");
-
+    vga_print("NINJA_OS booted!\n");
     idt_init();
-    puts("Boot Test...\n");
+    keyboard_init();
+    vga_print("Keyboard ready. Type something:\n");
 
-    while (1) { __asm__ __volatile__("hlt"); }
+    for (;;) {
+        __asm__ __volatile__("hlt");
+    }
 }

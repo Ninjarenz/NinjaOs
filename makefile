@@ -1,43 +1,38 @@
-AS      = nasm
-CC      = clang
-LD      = ld
+OS_NAME = ninja_os
+ISO_NAME = ninja_os.iso
 
-CFLAGS  = -ffreestanding -O2 -Wall -Wextra -target i686-elf -m32 -fno-pic -fno-pie -fno-stack-protector
-LDFLAGS = -T linker.ld -nostdlib -m elf_i386
+SRC = src
+BUILD = build
 
-SRC = $(wildcard src/*.c)
-OBJ = $(SRC:src/%.c=build/%.o) build/boot.o
+CFLAGS = -ffreestanding -O2 -Wall -Wextra -m32 -fno-pic -fno-pie -fno-stack-protector
+ASMFLAGS = -f elf32
 
+all: iso
 
-all: kernel.elf
+$(BUILD):
+	make clean
+	mkdir -p $(BUILD)
 
-# Boot-Assembly
-build/boot.o: src/boot.s
-	mkdir -p build
-	$(AS) -felf32 $< -o $@
+$(BUILD)/boot.o: $(SRC)/boot.s | $(BUILD)
+	nasm $(ASMFLAGS) $< -o $@
 
-# C-Dateien
-build/%.o: src/%.c
-	mkdir -p build
-	$(CC) $(CFLAGS) -c $< -o $@
+$(BUILD)/%.o: $(SRC)/%.c | $(BUILD)
+	clang $(CFLAGS) -c $< -o $@
 
-# Linken
-kernel.elf: $(OBJ)
-	$(LD) $(LDFLAGS) $(OBJ) -o $@
+kernel.elf: $(BUILD)/boot.o $(BUILD)/idt.o $(BUILD)/keyboard.o $(BUILD)/vga.o $(BUILD)/kernel.o
+	ld -m elf_i386 -T linker.ld -nostdlib $^ -o $@
 
-# ISO erzeugen
-iso: kernel.elf grub.cfg
+iso: kernel.elf
 	mkdir -p iso/boot/grub
 	cp kernel.elf iso/boot/kernel.elf
-	cp grub.cfg iso/boot/grub/grub.cfg
-	grub-mkrescue -o ninja_os.iso iso
+	echo 'set timeout=0' > iso/boot/grub/grub.cfg
+	echo 'set default=0' >> iso/boot/grub/grub.cfg
+	echo 'menuentry "NINJA_OS" { multiboot /boot/kernel.elf }' >> iso/boot/grub/grub.cfg
+	grub-mkrescue -o $(ISO_NAME) iso
 
-# Emulator starten
 run: iso
-	qemu-system-i386 -cdrom ninja_os.iso
-	
+	qemu-system-i386 -cdrom $(ISO_NAME)
 
-# Aufräumen
 clean:
-	rm -rf build *.o *.elf iso ninja_os.iso
+	rm -rf $(BUILD) *.elf iso $(ISO_NAME)
 	clear
