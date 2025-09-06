@@ -40,11 +40,6 @@ clean:
 
 run: ninja_os.iso
 	qemu-system-i386 -m 512M -cdrom ninja_os.iso -boot d -monitor stdio
-mount: ninja_os.iso
- mkdir /mnt/iso
- sudo mount -o loop ninja_os.iso /mnt/iso
- ls /mnt/iso/boot/
-check: 
- make mount
- hexdump -C kernel.elf | grep 'multiboot'
+
+
 
